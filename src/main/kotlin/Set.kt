@@ -235,6 +235,59 @@ class Set(capacity: Int) : Iterable<Int> {
     }
 
     /**
+     * Симметрическая разность множеств.
+     *
+     * Возвращает новое множество, содержащее элементы,
+     * которые принадлежат только одному из двух множеств.
+     */
+    infix fun symmetricDifference(other: Set): Set {
+        // В худшем случае все элементы обоих множеств
+        // попадут в результат.
+        val result = Set(this.size + other.size)
+
+        var i = 0
+        var j = 0
+
+        // Проходим по двум отсортированным массивам.
+        while (i < this.size && j < other.size) {
+            when {
+                // Элемент есть только в текущем множестве.
+                this.elements[i] < other.elements[j] -> {
+                    result.add(this.elements[i])
+                    i++
+                }
+
+                // Элемент есть только в другом множестве.
+                this.elements[i] > other.elements[j] -> {
+                    result.add(other.elements[j])
+                    j++
+                }
+
+                // Элемент есть в обоих множествах —
+                // в симметрическую разность он не попадает.
+                else -> {
+                    i++
+                    j++
+                }
+            }
+        }
+
+        // Добавляем оставшиеся элементы текущего множества.
+        while (i < this.size) {
+            result.add(this.elements[i])
+            i++
+        }
+
+        // Добавляем оставшиеся элементы другого множества.
+        while (j < other.size) {
+            result.add(other.elements[j])
+            j++
+        }
+
+        return result
+    }
+
+    /**
      * Текущее количество элементов в множестве.
      */
     fun size(): Int {
