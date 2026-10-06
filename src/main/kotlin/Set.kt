@@ -94,6 +94,57 @@ class Set(capacity: Int) : Iterable<Int> {
             }
         }
 
+    /**
+     * Объединение множеств.
+     *
+     * Возвращает новое множество, содержащее все элементы
+     * текущего множества и другого множества.
+     */
+    infix fun union(other: Set): Set {
+        val result = Set(this.size + other.size)
+
+        var i = 0
+        var j = 0
+
+        // Одновременно проходим по двум отсортированным массивам.
+        while (i < this.size && j < other.size) {
+            when {
+                // Элемент текущего множества меньше.
+                this.elements[i] < other.elements[j] -> {
+                    result.add(this.elements[i])
+                    i++
+                }
+
+                // Элемент другого множества меньше.
+                this.elements[i] > other.elements[j] -> {
+                    result.add(other.elements[j])
+                    j++
+                }
+
+                // Элементы равны — добавляем только один.
+                else -> {
+                    result.add(this.elements[i])
+                    i++
+                    j++
+                }
+            }
+        }
+
+        // Добавляем оставшиеся элементы текущего множества.
+        while (i < this.size) {
+            result.add(this.elements[i])
+            i++
+        }
+
+        // Добавляем оставшиеся элементы другого множества.
+        while (j < other.size) {
+            result.add(other.elements[j])
+            j++
+        }
+
+        return result
+    }
+
 
     /**
      * Текущее количество элементов в множестве.
