@@ -1,6 +1,6 @@
 package org.example
 
-class Set(capacity: Int) {
+class Set(capacity: Int) : Iterable<Int> {
 
     private val elements = IntArray(capacity)
     private var size = 0
@@ -71,6 +71,29 @@ class Set(capacity: Int) {
 
         return elements[index]
     }
+
+    /**
+     * Перегрузка итератора,
+     * чтобы по множеству можно было проходиться в циклах
+     */
+    override fun iterator(): Iterator<Int> {
+        return object : Iterator<Int> {
+            private var index = 0
+
+                override fun hasNext(): Boolean {
+                    return index < size
+                }
+
+                override fun next(): Int {
+                    if (!hasNext()) {
+                        throw NoSuchElementException()
+                    }
+
+                    return elements[index++]
+                }
+            }
+        }
+
 
     /**
      * Текущее количество элементов в множестве.
