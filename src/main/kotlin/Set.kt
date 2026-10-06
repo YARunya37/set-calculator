@@ -326,6 +326,51 @@ class Set(capacity: Int) : Iterable<Int> {
     }
 
     /**
+     * Находит дополнение текущего множества относительно универсального множества.
+     *
+     * Возвращает элементы универсального множества,
+     * которые не входят в текущее множество.
+     */
+    fun complement(universalSet: Set): Set {
+        val result = Set(universalSet.size)
+
+        var i = 0
+        var j = 0
+
+        while (i < this.size && j < universalSet.size) {
+            when {
+                // Элемент текущего множества меньше —
+                // переходим к следующему элементу текущего множества.
+                this.elements[i] < universalSet.elements[j] -> {
+                    i++
+                }
+
+                // Элемент универсального множества меньше —
+                // значит, его нет в текущем множестве.
+                universalSet.elements[j] < this.elements[i] -> {
+                    result.add(universalSet.elements[j])
+                    j++
+                }
+
+                // Элемент присутствует в обоих множествах —
+                // в дополнение он не попадает.
+                else -> {
+                    i++
+                    j++
+                }
+            }
+        }
+
+        // Добавляем оставшиеся элементы универсального множества.
+        while (j < universalSet.size) {
+            result.add(universalSet.elements[j])
+            j++
+        }
+
+        return result
+    }
+
+    /**
      * Текущее количество элементов в множестве.
      */
     fun size(): Int {
