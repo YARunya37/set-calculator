@@ -1,0 +1,238 @@
+package org.example
+
+class ConsoleMenu(
+    private val setManager: SetManager,
+) {
+
+    private val setParser: SetParser = SetParser(setManager)
+
+    fun run() {
+        showStartScreen()
+        showMainMenu()
+    }
+
+    private fun showStartScreen() {
+        while (true) {
+            println(
+                """
+                |========== КАЛЬКУЛЯТОР МНОЖЕСТВ ==========
+                |
+                |Универсальное множество U
+                |
+                |1. Задать универсальное множество вручную
+                |2. Сформировать U автоматически на основе объединения других множеств
+                |
+                |------------------------------------------
+                """.trimMargin()
+            )
+            print("Выберите действие: ")
+
+            when (readlnOrNull()?.trim()) {
+                "1" -> {
+                    setManager.setUniversalSet(readSetElements())
+                    return
+                }
+
+                "2" -> {
+                    setManager.clearUniversalSet()
+                    return
+                }
+
+                else -> println("Ошибка: выберите 1 или 2.")
+            }
+        }
+    }
+
+    /**
+     * Единая функция ввода элементов любого множества.
+     */
+    private fun readSetElements(): Set {
+        while (true) {
+            println(
+                """
+                |Введите целые числа через пробел или запятую.
+                |Пример: 1, 2, 3, 4, 5
+                |Для создания пустого множества оставьте строку пустой.
+                """.trimMargin()
+            )
+            print("Элементы: ")
+
+            val input = readlnOrNull() ?: return Set(0)
+            val set = Set(100)
+
+            if (input.isBlank()) {
+                return set
+            }
+
+            val elements = input.trim().split(Regex("[,\\s]+"))
+            var valid = true
+
+            for (element in elements) {
+                val number = element.toIntOrNull()
+
+                if (number == null) {
+                    println("Ошибка: '$element' не является целым числом.")
+                    valid = false
+                    break
+                }
+
+                set.add(number)
+            }
+
+            if (valid) {
+                return set
+            }
+
+            println("Повторите ввод.")
+        }
+    }
+
+    private fun showMainMenu() {
+        while (true) {
+            println(
+                """
+                |========== КАЛЬКУЛЯТОР МНОЖЕСТВ ==========
+                |
+                |U = ${buildSetContent(setManager.getUniversalSet())}
+                |
+                |A = ${buildSetContent(setManager.getSet('A'))}
+                |B = ${buildSetContent(setManager.getSet('B'))}
+                |C = ${buildSetContent(setManager.getSet('C'))}
+                |D = ${buildSetContent(setManager.getSet('D'))}
+                |E = ${buildSetContent(setManager.getSet('E'))}
+                |
+                |------------------------------------------
+                |
+                |1. Ввести выражение
+                |2. Создать / изменить множество
+                |0. Выход
+                """.trimMargin()
+            )
+            print("Выберите действие: ")
+
+            when (readlnOrNull()?.trim()) {
+                "1" -> showExpressionScreen()
+                "2" -> showSetMenu()
+                "0" -> {
+                    println("Работа программы завершена.")
+                    return
+                }
+
+                else -> println("Ошибка: выберите 1, 2 или 0.")
+            }
+        }
+    }
+
+    /**
+     * Выбор множества для создания или изменения.
+     */
+    private fun showSetMenu() {
+        while (true) {
+            println(
+                """
+                |========== СОЗДАНИЕ МНОЖЕСТВА ==========
+                |
+                |Выберите множество:
+                |A
+                |B
+                |C
+                |D
+                |E
+                |
+                |----------------------------------------
+                |Введите 0 для возврата в главное меню.
+                """.trimMargin()
+            )
+            print("Множество: ")
+
+            val input = readlnOrNull()?.trim()?.uppercase() ?: return
+
+            if (input == "0") {
+                return
+            }
+
+            if (input.length != 1 || input[0] !in "ABCDE") {
+                println("Ошибка: выберите A, B, C, D или E.")
+                continue
+            }
+
+            val name = input[0]
+            val newSet = readSetElements()
+
+            val success = setManager.setSet(name, newSet)
+
+            if (success) {
+                println("Множество $name обновлено: ${buildSetContent(newSet)}")
+            } else {
+                println(
+                    "Ошибка: элементы множества $name должны принадлежать U."
+                )
+            }
+
+
+            return
+        }
+    }
+
+    private fun showExpressionScreen() {
+        while (true) {
+            println(
+                """
+                |============ ВВОД ВЫРАЖЕНИЯ ============
+                |
+                |Доступные множества:
+                |A = ${buildSetContent(setManager.getSet('A'))}
+                |B = ${buildSetContent(setManager.getSet('B'))}
+                |C = ${buildSetContent(setManager.getSet('C'))}
+                |D = ${buildSetContent(setManager.getSet('D'))}
+                |E = ${buildSetContent(setManager.getSet('E'))}
+                |
+                |Операции:
+                ||  — объединение (∪)
+                |&  — пересечение (∩)
+                |-  — разность (∖)
+                |^  — симметрическая разность (△)
+                |~  — дополнение относительно U
+                |( ) — изменение порядка вычислений
+                |
+                |Приоритет операций: ~, ^, -, &, |
+                |
+                |Пример:
+                |(A | B) & ~C
+                |
+                |----------------------------------------
+                |Введите 0 для возврата в главное меню.
+                """.trimMargin()
+            )
+            print("> ")
+
+            val input = readlnOrNull()?.trim() ?: return
+
+            if (input == "0") {
+                return
+            }
+
+            try {
+                val result = setParser.parse(input)
+
+                println(
+                    """
+                    |Результат вычисления:
+                    |$input = ${buildSetContent(result)}
+                    """.trimMargin()
+                )
+            } catch (e: IllegalArgumentException) {
+                println("Ошибка: ${e.message}")
+            }
+        }
+    }
+
+    private fun buildSetContent(set: Set?): String {
+        return set?.joinToString(
+            prefix = "[ ",
+            postfix = " ]",
+            separator = ", "
+        ) ?: "не задано"
+    }
+}
+
