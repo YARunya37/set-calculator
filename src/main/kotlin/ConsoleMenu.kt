@@ -1,11 +1,14 @@
 package org.example
 
+import kotlin.random.Random
+
 class ConsoleMenu(
     private val setManager: SetManager,
 ) {
 
     private val setParser: SetParser = SetParser(setManager)
 
+    private var universalCreated = false
     fun run() {
         showStartScreen()
         showMainMenu()
@@ -30,6 +33,7 @@ class ConsoleMenu(
             when (readlnOrNull()?.trim()) {
                 "1" -> {
                     setManager.setUniversalSet(readSetElements())
+                    universalCreated = true
                     return
                 }
 
@@ -87,6 +91,46 @@ class ConsoleMenu(
         }
     }
 
+    private fun randomSet(): Set{
+        val result = Set(100)
+
+        // Количество
+        println("Введите число элементов:")
+
+        var count = readln().toIntOrNull()
+        while(count == null || count < 0){
+            println("Ошибка ввода! Необходимо ввести целое число >= 0")
+            count = readln().toIntOrNull()
+        }
+
+        if(universalCreated){
+            val universal = setManager.getUniversalSet()
+
+            if(universal.size() <= count){
+                println("Т. к. введенное число элементов больше или равно, чем есть в универсальном, то множество будет эквивалентно универсальному")
+
+                // Копируем U в result
+                for (element in universal){
+                    result.add(element)
+                }
+
+                return result
+            }
+
+            for(i in 0..< count){
+                // Если такое значение уже есть в универсальном множестве, то оно не добавиться. Нужно сгенерировать заново
+                while(!result.add(universal[Random.nextInt(0, universal.size()-1)])){}
+            }
+        }
+        else{
+            // Генерируем случайные числа в диапазоне [0, 100] и добавляем их в рещультат
+            for(i in 1..count){
+                result.add(Random.nextInt(0, 100))
+            }
+        }
+
+        return result
+    }
     private fun showMainMenu() {
         while (true) {
             println(
