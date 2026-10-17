@@ -51,7 +51,39 @@ class ConsoleMenu(
      * Единая функция ввода элементов любого множества.
      */
     private fun readSetElements(): Set {
-        while (true) {
+        println(
+            """Выберите как заполнить множество:
+                |1. Вручную
+                |2. Случайными числами [0, 100]
+            """.trimMargin()
+        )
+
+        var result: Set = Set(100)
+
+        do{
+            var option = readlnOrNull()
+            when(option){
+                "1" -> {
+                    result = readUserInput()
+                }
+                "2" -> {
+                    result = randomSet()
+                }
+                else -> {
+                    println("Ошибка ввода! Введите число, соответствующее выбранной команде")
+                    option = null
+                }
+            }
+        }while (option == null)
+
+        return result
+    }
+
+    private fun readUserInput(): Set{
+        var valid = false
+        val set = Set(100)
+
+        while (!valid) {
             println(
                 """
                 |Введите целые числа через пробел или запятую.
@@ -62,14 +94,14 @@ class ConsoleMenu(
             print("Элементы: ")
 
             val input = readlnOrNull() ?: return Set(0)
-            val set = Set(100)
 
             if (input.isBlank()) {
                 return set
             }
 
+            valid = true
+
             val elements = input.trim().split(Regex("[,\\s]+"))
-            var valid = true
 
             for (element in elements) {
                 val number = element.toIntOrNull()
@@ -83,12 +115,10 @@ class ConsoleMenu(
                 set.add(number)
             }
 
-            if (valid) {
-                return set
-            }
-
             println("Повторите ввод.")
         }
+
+        return set
     }
 
     private fun randomSet(): Set{
