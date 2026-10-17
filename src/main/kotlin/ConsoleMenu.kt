@@ -219,8 +219,10 @@ class ConsoleMenu(
                     """
                     |Результат вычисления:
                     |$input = ${buildSetContent(result)}
-                    """.trimMargin()
+                    |
+                    |Нажмите enter, чтобы продолжить""".trimMargin()
                 )
+                readln()
             } catch (e: IllegalArgumentException) {
                 println("Ошибка: ${e.message}")
             }
