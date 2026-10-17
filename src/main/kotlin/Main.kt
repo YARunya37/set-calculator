@@ -1,10 +1,9 @@
 package org.example
 
 fun main() {
-    val name = "Kotlin"
-    println("Hello, " + name + "!")
+    val setman = SetManager()
 
-    for (i in 1..5) {
-        println("i = $i")
-    }
+    val consoleMenu = ConsoleMenu(setman)
+
+    consoleMenu.run()
 }
