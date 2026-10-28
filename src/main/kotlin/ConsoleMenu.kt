@@ -15,36 +15,53 @@ class ConsoleMenu(
     }
 
     private fun showStartScreen() {
-        while (true) {
-            println(
-                """
-                |========== КАЛЬКУЛЯТОР МНОЖЕСТВ ==========
-                |
-                |Универсальное множество U
-                |
-                |1. Задать универсальное множество вручную
-                |2. Сформировать U автоматически на основе объединения других множеств
-                |
-                |------------------------------------------
-                """.trimMargin()
+        println(
+            """
+            |========== КАЛЬКУЛЯТОР МНОЖЕСТВ ==========
+            |
+            |Универсальное множество U
+            |
+            |1. Задать универсальное множество вручную
+            |2. Сформировать U автоматически на основе объединения других множеств
+            |
+            |------------------------------------------
+            """.trimMargin()
+        )
+
+        when (
+            readValidInput(
+                listOf("1", "2"),
+                "Выберите действие: ",
+                "Ошибка: выберите 1 или 2.\n",
             )
-            print("Выберите действие: ")
-
-            when (readlnOrNull()?.trim()) {
-                "1" -> {
-                    setManager.setUniversalSet(readSetElements())
-                    universalCreated = true
-                    return
-                }
-
-                "2" -> {
-                    setManager.clearUniversalSet()
-                    return
-                }
-
-                else -> println("Ошибка: выберите 1 или 2.")
+        ) {
+            "1" -> {
+                setManager.setUniversalSet(readSetElements())
+                universalCreated = true
             }
+
+            "2" -> setManager.clearUniversalSet()
         }
+    }
+
+    private fun readValidInput(
+        validValues: Collection<String>,
+        message: String,
+        errorMessage: String,
+        normalize: (String) -> String = { it.trim() },
+    ): String {
+        var input: String?
+
+        do {
+            print(message)
+            input = readlnOrNull()?.let(normalize)
+
+            if (input == null || input !in validValues) {
+                println(errorMessage)
+            }
+        } while (input == null || input !in validValues)
+
+        return input
     }
 
     /**
@@ -58,25 +75,17 @@ class ConsoleMenu(
             """.trimMargin()
         )
 
-        var result: Set = Set(100)
-
-        do{
-            var option = readlnOrNull()
-            when(option){
-                "1" -> {
-                    result = readUserInput()
-                }
-                "2" -> {
-                    result = randomSet()
-                }
-                else -> {
-                    println("Ошибка ввода! Введите число, соответствующее выбранной команде")
-                    option = null
-                }
-            }
-        }while (option == null)
-
-        return result
+        return when (
+            readValidInput(
+                listOf("1", "2"),
+                "",
+                "Ошибка ввода! Введите число, соответствующее выбранной команде",
+            )
+        ) {
+            "1" -> readUserInput()
+            "2" -> randomSet()
+            else -> randomSet()
+        }
     }
 
     private fun readUserInput(): Set{
@@ -182,17 +191,19 @@ class ConsoleMenu(
                 |0. Выход
                 """.trimMargin()
             )
-            print("Выберите действие: ")
-
-            when (readlnOrNull()?.trim()) {
+            when (
+                readValidInput(
+                    listOf("1", "2", "0"),
+                    "Выберите действие: ",
+                    "Ошибка: выберите 1, 2 или 0.",
+                )
+            ) {
                 "1" -> showExpressionScreen()
                 "2" -> showSetMenu()
                 "0" -> {
                     println("Работа программы завершена.")
                     return
                 }
-
-                else -> println("Ошибка: выберите 1, 2 или 0.")
             }
         }
     }
@@ -201,50 +212,44 @@ class ConsoleMenu(
      * Выбор множества для создания или изменения.
      */
     private fun showSetMenu() {
-        while (true) {
-            println(
-                """
-                |========== СОЗДАНИЕ МНОЖЕСТВА ==========
-                |
-                |Выберите множество:
-                |A
-                |B
-                |C
-                |D
-                |E
-                |
-                |----------------------------------------
-                |Введите 0 для возврата в главное меню.
-                """.trimMargin()
-            )
-            print("Множество: ")
+        println(
+            """
+            |========== СОЗДАНИЕ МНОЖЕСТВА ==========
+            |
+            |Выберите множество:
+            |A
+            |B
+            |C
+            |D
+            |E
+            |
+            |----------------------------------------
+            |Введите 0 для возврата в главное меню.
+            """.trimMargin()
+        )
 
-            val input = readlnOrNull()?.trim()?.uppercase() ?: return
+        val input = readValidInput(
+            listOf("A", "B", "C", "D", "E", "0"),
+            "Множество: ",
+            "Ошибка: выберите A, B, C, D или E.",
+            normalize = { it.trim().uppercase() },
+        )
 
-            if (input == "0") {
-                return
-            }
-
-            if (input.length != 1 || input[0] !in "ABCDE") {
-                println("Ошибка: выберите A, B, C, D или E.")
-                continue
-            }
-
-            val name = input[0]
-            val newSet = readSetElements()
-
-            val success = setManager.setSet(name, newSet)
-
-            if (success) {
-                println("Множество $name обновлено: ${buildSetContent(newSet)}")
-            } else {
-                println(
-                    "Ошибка: элементы множества $name должны принадлежать U."
-                )
-            }
-
-
+        if (input == "0") {
             return
+        }
+
+        val name = input[0]
+        val newSet = readSetElements()
+
+        val success = setManager.setSet(name, newSet)
+
+        if (success) {
+            println("Множество $name обновлено: ${buildSetContent(newSet)}")
+        } else {
+            println(
+                "Ошибка: элементы множества $name должны принадлежать U."
+            )
         }
     }
 
